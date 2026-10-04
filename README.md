@@ -1,3 +1,5 @@
+<img width="300" height="300" alt="image" src="https://github.com/user-attachments/assets/0a71a6c2-e5d0-477f-aed7-b99361db2ec5" />
+
 # annblackbox-custom-firmware-installer
 
 Desktop firmware installer for the **M-VAVE BlackBox V20**.
