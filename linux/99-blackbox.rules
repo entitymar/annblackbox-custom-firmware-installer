@@ -1,0 +1,3 @@
+# Optional Linux permission rule for the observed BlackBox firmware loader.
+# Install in /etc/udev/rules.d/ with administrator permissions only if needed.
+SUBSYSTEM=="hidraw", ATTRS{idVendor}=="4d4a", ATTRS{idProduct}=="4155", TAG+="uaccess"
