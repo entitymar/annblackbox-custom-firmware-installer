@@ -74,7 +74,7 @@ A writable extracted folder is required. Keep the launcher, `blackbox/`, `firmwa
 
 The bootstrap can prepare a compatible CPython/runtime and the required Python packages when the current interpreter is not suitable. First-time setup may require internet access.
 
-Before flashing, close Altar, M-UPGRADE, DAWs and other applications that may have the BlackBox MIDI ports open.
+Before flashing, close M-UPGRADE, DAWs and other applications that may have the BlackBox MIDI ports open.
 
 ## Read-only checks
 
