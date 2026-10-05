@@ -20,9 +20,7 @@ The original M-VAVE BlackBox V20 image is stored as a normal external file:
 
 ## How it works
 
-The installer targets the BlackBox firmware-update path, not the host operating system and not the device filesystem in general.
-
-The update path is:
+The installer targets the BlackBox firmware-update path, the update path is:
 
 `USB-MIDI -> OTA preparation -> update-mode detection -> HID or OTA-MIDI transfer -> reboot verification`
 
@@ -37,18 +35,6 @@ In practice:
 7. A flash is not reported as successful merely because bytes were sent. The installer waits for completion and then checks that the device returns as a normal BlackBox after reboot.
 
 The host-side same-version rejection is not used, so a **V20 -> V20** attempt can be made. Device-side validation still applies; the installer does not fake a successful flash when the device rejects the image.
-
-More protocol-level detail is in [TECHNICAL.md](TECHNICAL.md).
-
-## Files that matter
-
-- `annblackbox-custom-firmware-installer.pyw` — Windows double-click launcher.
-- `annblackbox-custom-firmware-installer.py` — console/portable launcher.
-- `blackbox/` — UI, protocol, resource validation and dependency setup.
-- `firmware/BlackBox_FACTORY_V20.fwsc` — stock V20 restore image.
-- `native/windows/M-UPGRADE/` — Windows helper and matching native DLLs.
-- `dependencies/` — bootstrap/runtime assets and locally created dependencies.
-- `logs/` — runtime logs generated locally after launch.
 
 ## Running
 
