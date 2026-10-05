@@ -18,12 +18,6 @@ The original M-VAVE BlackBox V20 image is stored as a normal external file:
 
 `firmware/BlackBox_FACTORY_V20.fwsc`
 
-SHA-256:
-
-`c0fef191b860d3b20f77fc492a24986eef2d12df44bb5e38355684820e26cb08`
-
-The firmware is **not embedded inside the Python source**. The restore path verifies this hash before it uses the file.
-
 ## How it works
 
 The installer targets the BlackBox firmware-update path, not the host operating system and not the device filesystem in general.
