@@ -1,0 +1,27 @@
+     0.047 annblackbox-custom-firmware-installer; mode=original; platform=Windows AMD64; Python=3.12.15
+     0.047 FWSC SHA256=c0fef191b860d3b20f77fc492a24986eef2d12df44bb5e38355684820e26cb08; wrapper=BlackBox_020; slots=20; payload=700416
+     0.110 Native helper preflight (no MIDI): exit=64; SHA256=cbda7a95e506cdeefbe39e9718106586147f2ee9857a83e0509644e349591e3b
+     0.110 Connecting to BlackBox…
+     0.156 Pre-install identity: BlackBox_020; ports=('USB-Midi 0', 'USB-Midi 1')
+     0.156 Checking V20 firmware with the device…
+     2.156 MIDI request flash=0 address=0x00000000 length=512
+     2.156 MIDI request flash=0 address=0x00000200 length=512
+     2.172 MIDI request flash=0 address=0x00000400 length=512
+     2.172 MIDI request flash=0 address=0x00000400 length=512
+     2.188 MIDI request flash=0 address=0x00004400 length=512
+     2.188 MIDI request flash=0 address=0x00000400 length=32
+     2.203 MIDI request flash=0 address=0x00000400 length=512
+     2.203 MIDI request flash=0 address=0x00004400 length=32
+     2.203 MIDI request flash=0 address=0x000A47FF length=32
+    14.110 Traceback (most recent call last):
+  File "C:\Users\mdeath\Downloads\annblackbox-custom-firmware-installer-main\annblackbox-custom-firmware-installer-main\blackbox\core.py", line 911, in run
+    self.prepare_midi(connection, firmware)
+  File "C:\Users\mdeath\Downloads\annblackbox-custom-firmware-installer-main\annblackbox-custom-firmware-installer-main\blackbox\core.py", line 730, in prepare_midi
+    flash, address, length = upload_request(connection.receive(30))
+                                            ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\mdeath\Downloads\annblackbox-custom-firmware-installer-main\annblackbox-custom-firmware-installer-main\blackbox\core.py", line 544, in receive
+    self.control.check()
+  File "C:\Users\mdeath\Downloads\annblackbox-custom-firmware-installer-main\annblackbox-custom-firmware-installer-main\blackbox\core.py", line 364, in check
+    raise Cancelled("Cancelled. Firmware transfer was not started.")
+blackbox.resources.Cancelled: Cancelled. Firmware transfer was not started.
+

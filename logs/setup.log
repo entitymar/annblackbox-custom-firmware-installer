@@ -1,0 +1,30 @@
+Launcher: CPython 3.14.2 (tags/v3.14.2:df79316, Dec  5 2025, 17:18:21) [MSC v.1944 64 bit (AMD64)] (64-bit)
+Application runtime: C:\Users\mdeath\Downloads\annblackbox-custom-firmware-installer-main\annblackbox-custom-firmware-installer-main\dependencies\runtime-managed-3.12-Windows-x86_64
+
+Running: ["C:\\Users\\mdeath\\Downloads\\annblackbox-custom-firmware-installer-main\\annblackbox-custom-firmware-installer-main\\dependencies\\tools\\uv-0.12.23-Windows-x86_64\\uv.exe", "venv", "--no-config", "--no-project", "--managed-python", "--allow-existing", "--python", "cpython-3.12-windows-x86_64-none", "--seed", "--default-index", "https://pypi.org/simple", "C:\\Users\\mdeath\\Downloads\\annblackbox-custom-firmware-installer-main\\annblackbox-custom-firmware-installer-main\\dependencies\\runtime-managed-3.12-Windows-x86_64"]
+Downloading cpython-3.12.15-windows-x86_64-none (download) (21.0MiB)
+ Downloaded cpython-3.12.15-windows-x86_64-none (download)
+Using CPython 3.12.15
+Creating virtual environment with seed packages at: dependencies\runtime-managed-3.12-Windows-x86_64
+ + pip==26.2.1
+Activate with: dependencies\runtime-managed-3.12-Windows-x86_64\Scripts\activate
+
+Running: ["C:\\Users\\mdeath\\Downloads\\annblackbox-custom-firmware-installer-main\\annblackbox-custom-firmware-installer-main\\dependencies\\runtime-managed-3.12-Windows-x86_64\\Scripts\\python.exe", "-I", "-m", "pip", "--isolated", "install", "--disable-pip-version-check", "--only-binary=:all:", "--retries", "2", "--timeout", "30", "--index-url", "https://pypi.org/simple", "PySide6-Essentials==6.8.3", "python-rtmidi==1.5.8", "hidapi==0.14.0.post4"]
+Collecting PySide6-Essentials==6.8.3
+  Using cached PySide6_Essentials-6.8.3-cp39-abi3-win_amd64.whl.metadata (4.1 kB)
+Collecting python-rtmidi==1.5.8
+  Using cached python_rtmidi-1.5.8-cp312-cp312-win_amd64.whl.metadata (7.5 kB)
+Collecting hidapi==0.14.0.post4
+  Using cached hidapi-0.14.0.post4-cp312-cp312-win_amd64.whl.metadata (3.7 kB)
+Collecting shiboken6==6.8.3 (from PySide6-Essentials==6.8.3)
+  Using cached shiboken6-6.8.3-cp39-abi3-win_amd64.whl.metadata (2.8 kB)
+Collecting setuptools>=19.0 (from hidapi==0.14.0.post4)
+  Using cached setuptools-84.0.0-py3-none-any.whl.metadata (6.6 kB)
+Using cached PySide6_Essentials-6.8.3-cp39-abi3-win_amd64.whl (72.2 MB)
+Using cached python_rtmidi-1.5.8-cp312-cp312-win_amd64.whl (129 kB)
+Using cached hidapi-0.14.0.post4-cp312-cp312-win_amd64.whl (70 kB)
+Using cached shiboken6-6.8.3-cp39-abi3-win_amd64.whl (1.2 MB)
+Using cached setuptools-84.0.0-py3-none-any.whl (818 kB)
+Installing collected packages: shiboken6, setuptools, python-rtmidi, PySide6-Essentials, hidapi
+
+Successfully installed PySide6-Essentials-6.8.3 hidapi-0.14.0.post4 python-rtmidi-1.5.8 setuptools-84.0.0 shiboken6-6.8.3
