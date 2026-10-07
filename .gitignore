@@ -1,0 +1,10 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# The tool writes one persistent log per run
+logs/
+
+# The vendor updater regenerates its logs on every run
+windows/official-updater/LOG/

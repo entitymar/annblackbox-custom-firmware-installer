@@ -1,4 +1,0 @@
-# Official Python packages; binary wheels only.
-PySide6-Essentials==6.8.3
-python-rtmidi==1.5.8
-hidapi==0.14.0.post4
