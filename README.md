@@ -98,8 +98,7 @@ launched, and the pristine binary is SHA-256-pinned (`9444eb6e…97b8`).
   is **no downgrade lock** in the updater (the only version guards are the two above,
   and a downgrade — older file over newer pedal — already passes the vendor’s own logic).
 * **Restore V20 works no matter what you installed before** — v21, v22, v30, your own
-  builds. This was verified on the device with a v21-labeled and a v19-labeled container
-  (an upgrade and a downgrade) plus repeated factory restores.
+  builds.
 * The pedal may keep a **pending update cycle** from an interrupted write. While it does,
   a flash of a *different* file stalls at the updater’s own
   *“Verification timeout! Please power cycle the device…”* step. The tool now handles
@@ -121,16 +120,6 @@ You just see extra progress lines in the log; the final result is the firmware y
 updater windows from previous attempts are also closed automatically, and both bundled
 firmwares are **embedded in the tool**: if `firmware/` loses one, it is restored
 automatically before flashing.
-
-## Verified on device
-
-| Action | Result |
-|---|---|
-| Install custom firmware | ✅ flashed end-to-end (~20 s), pedal reboots and reconnects |
-| Install a v21-labeled file (upgrade) | ✅ flashed clean |
-| Install a v19-labeled file (downgrade) | ✅ flashed clean (with auto-recovery) |
-| Restore V20 factory (from v21/v19/custom) | ✅ flashed clean, pedal back on V20 |
-| Interrupted write → restore | ✅ auto-recovery completed the pending cycle and restored V20 |
 
 ## Safety notes
 
@@ -158,6 +147,24 @@ LICENSE
 ```
 
 Presets are **not touched** by a flash — only the firmware is replaced.
+
+## Disclaimer
+
+This is **not an official M-VAVE product** and it is **not affiliated with, authorized,
+endorsed or supported by M-VAVE, Sinco, or any related brand or company**. All product
+names, trademarks and brands belong to their respective owners. This is an independent,
+community-made tool published by **entitymar**.
+
+It is provided **“as is”, without warranty of any kind**, express or implied. You use it
+**entirely at your own risk and precaution**:
+
+* flashing firmware can damage or brick your pedal if something goes wrong (power loss,
+  unplugging during the write, third-party software, etc.);
+* modifying or flashing firmware may **void your warranty**;
+* the author is **not responsible** for any damage to your device, data loss, or any
+  other consequence of using this tool.
+
+By downloading, running or using this tool you accept these terms.
 
 ## Credits
 
