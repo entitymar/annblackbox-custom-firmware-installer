@@ -15,7 +15,7 @@ A small Windows tool (Python + tkinter, standard library only) with exactly thre
 
 | Button | What it does |
 |---|---|
-| **Install custom firmware** | Opens a **file picker** so you can choose the `.fwsc` to flash — the dialog starts in `firmware/` with the bundled custom preselected, but any BlackBox firmware file works (must be exactly 700,436 bytes: another custom build, the factory file, a v21/v30 build, …) |
+| **Install custom firmware** | Opens a **file picker** so you can choose the `.fwsc` to flash — any BlackBox firmware file works (must be exactly 700,436 bytes). The dialog starts in the `firmware/` folder |
 | **Restore V20 factory** | Flashes the factory `firmware/BlackBox_FACTORY_V20.fwsc` back — works from **any** installed version |
 | **Cancel** | Closes the tool (asks first if a flash is running) |
 
@@ -63,7 +63,6 @@ reporting an issue. The updater also keeps its own logs in `windows/official-upd
 ### Console mode
 
 ```
-python annblackbox-custom-firmware-installer.py --flash custom        # bundled custom
 python annblackbox-custom-firmware-installer.py --flash factory       # factory V20
 python annblackbox-custom-firmware-installer.py --flash "C:\path\to\my.fwsc"
 python annblackbox-custom-firmware-installer.py --selftest            # patch engine check
@@ -111,8 +110,8 @@ When the tool sees that stall it automatically:
 1. closes the stuck updater window **and stops its process** (a leftover process keeps the
    exe locked — this used to make retries fail),
 2. finds the file the pedal is pinned to and **completes the pending cycle** by flashing
-   it — it tries every candidate in order: the bundled custom firmware, the bundled
-   factory, and the last file you flashed (this run always flies clean),
+   it — it tries every firmware it can find (the `.fwsc` files in `firmware/` and the
+   last file you flashed) until one completes the cycle (that run always flies clean),
 3. re-runs the flash you asked for — which then also flies clean.
 
 You just see extra progress lines in the log; the final result is the firmware you chose
@@ -137,9 +136,9 @@ automatically before flashing.
 ## Files
 
 ```
-annblackbox-custom-firmware-installer.py    the whole tool (stdlib only; embeds fallback copies of both firmwares)
-firmware/ANNBLACKBOX_custom.fwsc            custom firmware  (sha256 bfb5b267…2b36)
-firmware/BlackBox_FACTORY_V20.fwsc          factory V20      (sha256 c0fef191…cb08)
+annblackbox-custom-firmware-installer.py    the whole tool (stdlib only; embeds fallback copies of the firmware files)
+firmware/                                   put the .fwsc firmware files here (any BlackBox firmware)
+firmware/BlackBox_FACTORY_V20.fwsc          factory V20 — used by "Restore V20 factory" (sha256 c0fef191…cb08)
 logs/                                       one persistent log per run (created at run time)
 windows/M-UPGRADE-NTFS-BLACKBOX.exe.pristine   untouched vendor binary (sha256 9444eb6e…97b8)
 windows/official-updater/                   the official updater (Qt) — working copy
