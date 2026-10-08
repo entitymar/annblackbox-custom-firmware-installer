@@ -1,132 +1,57 @@
 # ANNBLACKBOX — Custom Firmware Installer
 
-Windows tool that flashes firmware onto the Sinco **BlackBox** pedal and restores the
-factory **V20** at any time, no matter which version is installed (v20, v21, v22, v30…).
-It does not reimplement the OTA protocol: it patches a working copy of the official
-ANNBLACKBOX updater (`M-UPGRADE-NTFS-BLACKBOX.exe`), launches it and follows the flash
-through the updater’s own log files.
+A Windows firmware flasher for the **Sinco / M-VAVE BlackBox**. It can load a custom `.fwsc` image or attempt to restore the original **V20** firmware, including V20-to-V20 reflashing. The USB/OTA transport is **not rewritten**: the tool patches a disposable copy of the vendor's `M-UPGRADE-NTFS-BLACKBOX.exe` and lets the original updater perform the transfer.
 
-## What it is
+> **Hardware-tested scope:** my own ANNBLACKBOX running the official V20 firmware. The installer includes paths intended for other installed versions, but I have **not** validated every version, hardware revision, downgrade, or custom image. A correctly sized file is not necessarily safe firmware.
 
-Three buttons:
+## Reverse engineering / patch points
 
-| Button | Action |
-|---|---|
-| **Install custom firmware** | Opens a file picker to choose the `.fwsc` to flash. Any BlackBox firmware works (must be exactly 700,436 bytes); the dialog starts in `firmware/`. |
-| **Restore V20 factory** | Flashes `firmware/BlackBox_FACTORY_V20.fwsc`. Works from any installed version. |
-| **Cancel** | Closes the tool (asks first while a flash is running). |
+This was built from my own decompilation and analysis of two vendor host applications:
 
-## Requirements
+- [MVAVE M-UPGRADE — decompiled](https://github.com/entitymar/MVAVE-M-UPGRADE-decompiled)
+- [MVAVE ANNBLACKBOX Firmware Update Software — decompiled](https://github.com/entitymar/MVAVE-ANNBLACKBOX-FIRMWARE-UPDATE-SOFTWARE-decompiled)
 
-* Windows 8 / 10 / 11 — 64-bit.
-* Python 3.8 or newer, from <https://www.python.org/downloads/windows/>
-  (official installer, with the default *tcl/tk and IDLE* option; tick
-  *Add python.exe to PATH*). If tkinter is missing the tool tries to install it
-  (`pip install --user tk`); if that fails it shows a native error window with the fix.
-* No admin rights and no internet connection are needed to flash.
-* ~150 MB of disk (vendor updater ~71 MB + firmware + logs).
-* Pedal connected directly to a USB port with a data cable (no unpowered hub during a flash).
+The useful finding was that the original M-UPGRADE executable already contains the BlackBox firmware as a contiguous byte range. Instead of inventing another OTA stack, I identified the embedded image and two **host-side** version gates, then kept the vendor's USB-MIDI communication, transfer sequence and logging intact.
 
-## How to use
+| Location in vendor EXE | Patch | Purpose |
+|---|---|---|
+| `0x2E66BF` | Replace **700,436 bytes** with the selected `.fwsc` | Swap the embedded firmware payload |
+| `0x31C7A` | `0F 85 13 01 00 00` → `90 E9 13 01 00 00` | Change the same-version `JNE` branch into an unconditional jump |
+| `0x32762` | `7F 32` → `EB 32` | Bypass the updater's version-dependent UI gate |
 
-1. Plug the pedal in and wait for it to enumerate (shows up as `USB-Midi` / `BlackBox`).
-2. Double-click `annblackbox-custom-firmware-installer.py`.
-3. **Install custom firmware** → pick the `.fwsc` → confirm — or **Restore V20 factory** →
-   confirm.
-4. Wait until the tool reports the result (a message box appears if something fails).
+Before each attempt, the tool checks the pristine executable's pinned SHA-256, restores a fresh working copy, verifies the original instruction signatures, applies the changes and reads them back. It then launches the **official updater**, triggers its update action and follows the vendor's OTA logs. These patches affect the **Windows host updater**, not the pedal's own integrity checks or bootloader.
 
-### Logs
+## Use
 
-Each run writes `logs/annblackbox-<date>-<time>-<kind>.log` with the tool’s messages and
-every line the updater writes. The **logs** link in the footer opens that folder. The
-updater also keeps its own logs in `windows/official-updater/LOG/`.
+**Requirements:** 64-bit Windows, Python 3.8+ with `tkinter`, a direct USB data connection and the bundled vendor updater. No internet connection or administrator access is required for flashing. Windows 10/11 are the recommended targets; compatibility with every Windows release has not been physically verified.
 
-### Console mode
+1. Connect the BlackBox by USB and run `annblackbox-custom-firmware-installer.py`.
+2. Choose **Install custom firmware** to select a 700,436-byte `.fwsc`, or **Restore V20 factory** to use `firmware/BlackBox_FACTORY_V20.fwsc`.
+3. Confirm and leave the pedal connected until the updater finishes and the device reboots. **Cancel** closes the tool; interrupting an active write is unsafe.
 
-```
-python annblackbox-custom-firmware-installer.py --flash factory       # factory V20
-python annblackbox-custom-firmware-installer.py --flash "C:\path\to\my.fwsc"
-python annblackbox-custom-firmware-installer.py --selftest            # patch engine check
-python annblackbox-custom-firmware-installer.py --probe               # open+close updater, no flash
+CLI diagnostics and flashing:
+
+```powershell
+python annblackbox-custom-firmware-installer.py --selftest
+python annblackbox-custom-firmware-installer.py --probe
+python annblackbox-custom-firmware-installer.py --flash factory
+python annblackbox-custom-firmware-installer.py --flash "C:\path\to\custom.fwsc"
 ```
 
-## How it works
+`--selftest` checks patch mechanics on a temporary executable; `--probe` launches the updater without flashing. Neither replaces a physical flash test. Tool logs are saved under `logs/`; original updater logs remain under `windows/official-updater/LOG/`.
 
-1. Restores the pristine updater
-   (`windows/M-UPGRADE-NTFS-BLACKBOX.exe.pristine`, SHA-256 pinned `9444eb6e…97b8`) over
-   the working copy and applies three in-place patches:
-   * **firmware swap** — the chosen `.fwsc` is written over the 700,436-byte firmware
-     block embedded in the exe at `0x2E66BF`;
-   * **same-version guard bypass** — `0F 85 13 01 00 00` → `90 E9 13 01 00 00` at `0x31C7A`;
-   * **UI gate bypass** — `7F 32` → `EB 32` at `0x32762`.
-   Every write is read back and verified.
-2. Launches the updater and activates its **Update the firmware** button.
-3. Reads the updater’s log files and reports progress and the final result.
+If the updater hits the known **Verification timeout** after an interrupted cycle, the tool attempts to complete the pending transfer using its available recovery candidates (bundled custom/factory image and last selected image), then retries the requested flash. **Recovery is best-effort, not a guaranteed unbrick method.** Do not disconnect USB during writing; if recovery fails, stop and inspect the logs before trying again.
 
-### Versions
+## A personal note
 
-The firmware version is stored only in the file header, and the updater has no downgrade
-lock; the tool bypasses the two version checks above regardless. Restoring V20 therefore
-works from any installed version (v21, v22, v30, custom builds).
+I reverse-engineered the updater software myself because I wanted a more flexible, reversible way to work with my BlackBox without replacing a working OTA protocol. **DeepSeek 4.1 Flash assisted me** with parts of the development, but I did not want to publish something based only on generated code or assumptions.
 
-### Self-recovery
+I tested this repeatedly on **my own ANNBLACKBOX with official V20**. During development I managed to **soft-brick the pedal several times**, and getting it working again was part of learning where the process actually fails. I kept adjusting the method and checking it on real hardware; it is now stable in the V20 scenarios I have personally tested, not magically proven safe for every setup.
 
-If a write is interrupted mid-transfer (for example the tool is closed while flashing),
-the pedal keeps a pending update cycle pinned to the interrupted file. While that is the
-case, a flash of any other file stalls at the updater’s own
-*“Verification timeout! Please power cycle the device and try again.”* step, and nothing is
-written. The tool detects this and, in order:
+I will improve it further as I can. Please be patient: my testing is slow on purpose. With firmware, I would rather verify things properly than rush out **AI slop** that looks convincing but puts someone else's device at risk.
 
-1. closes the stuck updater window and stops its process (a leftover process keeps the exe
-   locked, which would block patching);
-2. flashes the firmware the pedal is pinned to — it tries the `.fwsc` files in `firmware/`
-   and the last file you flashed, until one completes the pending cycle;
-3. re-runs the flash you asked for.
+## Risk and attribution
 
-Leftover updater windows and processes are also cleared before every attempt. The bundled
-firmwares are embedded in the tool and re-created if the files in `firmware/` go missing.
+**Unofficial project.** Not affiliated with, authorized, endorsed or supported by M-VAVE, Sinco or related companies. The original OTA engine belongs to its vendor; this tool only modifies a working copy of its Windows updater. All trademarks belong to their owners.
 
-## Safety notes
-
-* Do not unplug USB while flashing. The pedal has a battery — unplugging does not power it
-  off.
-* Do not close the tool while the firmware write is in progress (it warns you if you try):
-  cancelling mid-write leaves the pending cycle described above.
-* After the write the pedal reboots; USB can disappear for 1–3 minutes and then come back.
-* If a flash fails twice in a row (even after the automatic recovery), power-cycle the
-  pedal (hold its power button until OFF, leave it 2–3 minutes, then boot and reconnect
-  USB) and run the tool again.
-
-## Files
-
-```
-annblackbox-custom-firmware-installer.py    the whole tool (stdlib only; embeds fallback copies of the firmware files)
-firmware/                                   put the .fwsc firmware files here (any BlackBox firmware)
-firmware/BlackBox_FACTORY_V20.fwsc          factory V20 — used by "Restore V20 factory" (sha256 c0fef191…cb08)
-logs/                                       one persistent log per run (created at run time)
-windows/M-UPGRADE-NTFS-BLACKBOX.exe.pristine   untouched vendor binary (sha256 9444eb6e…97b8)
-windows/official-updater/                   the official updater (Qt) — working copy
-LICENSE
-```
-
-Presets are not touched by a flash — only the firmware is replaced.
-
-## Disclaimer
-
-This is **not an official M-VAVE product** and it is **not affiliated with, authorized,
-endorsed or supported by M-VAVE, Sinco, or any related brand or company**. All product
-names, trademarks and brands belong to their respective owners.
-
-It is provided **“as is”, without warranty of any kind**. You use it **entirely at your own
-risk and precaution**:
-
-* flashing firmware can damage or brick your pedal if something goes wrong (power loss,
-  unplugging during the write, third-party software, etc.);
-* modifying or flashing firmware may **void your warranty**;
-* the author is **not responsible** for any damage to your device, data loss, or any other
-  consequence of using this tool.
-
-By downloading, running or using this tool you accept these terms.
-
-Note: the OTA engine is the original vendor updater (M-UPGRADE-NTFS-BLACKBOX, Sinco); this
-tool only patches its embedded firmware and two guard branches at run time.
+Provided **as is, without warranty**. Flashing may cause data loss, invalidate warranties or render the pedal unusable. **Use entirely at your own risk.** Keep a known-good firmware image, do not interrupt the transfer and do not assume cross-version restores are guaranteed.
